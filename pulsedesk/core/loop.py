@@ -2,57 +2,80 @@
 
 import asyncio
 import logging
-from datetime import datetime
 
-from pulsedesk.core.event_bus import EventBus
-from pulsedesk.core.events import HeartbeatEvent
-from pulsedesk.core.state import AppState
+from pulsedesk.sources.base import EventSource
 
 
 logger = logging.getLogger(__name__)
 
 
 class PulseDeskLoop:
-    """Coordina el ciclo de ejecución de PulseDesk."""
+    """Coordina el ciclo de ejecución y las fuentes de eventos."""
 
     def __init__(
         self,
-        event_bus: EventBus,
-        state: AppState,
+        sources: list[EventSource],
     ) -> None:
-        self._event_bus = event_bus
-        self._state = state
+        self._sources = sources
+        self._tasks: list[asyncio.Task[None]] = []
         self._running = False
 
     async def start(self) -> None:
-        """Inicia el ciclo principal."""
+        """Inicia todas las fuentes y mantiene activo el sistema."""
+
+        if self._running:
+            return
 
         self._running = True
-        self._state.set_running(True)
 
-        logger.info("PulseDesk iniciado.")
+        logger.info(
+            "PulseDesk iniciado | fuentes=%d",
+            len(self._sources),
+        )
+
+        self._tasks = [
+            asyncio.create_task(
+                source.start(),
+                name=f"source-{source.name}",
+            )
+            for source in self._sources
+        ]
 
         try:
-            while self._running:
-                event = HeartbeatEvent(
-                    timestamp=datetime.now(),
-                )
-
-                await self._event_bus.publish(event)
-
-                await asyncio.sleep(1)
+            await asyncio.gather(*self._tasks)
 
         except asyncio.CancelledError:
-            logger.info("Loop cancelado.")
+            logger.info("Loop principal cancelado.")
             raise
 
         finally:
-            self._running = False
-            self._state.set_running(False)
+            await self.stop()
 
-            logger.info("PulseDesk detenido.")
+    async def stop(self) -> None:
+        """Detiene todas las fuentes y cancela sus tareas."""
 
-    def stop(self) -> None:
-        """Solicita detener el ciclo."""
+        if not self._running and not self._tasks:
+            return
 
         self._running = False
+
+        logger.info("Deteniendo fuentes...")
+
+        for source in self._sources:
+            await source.stop()
+
+        current_task = asyncio.current_task()
+
+        for task in self._tasks:
+            if task is not current_task and not task.done():
+                task.cancel()
+
+        if self._tasks:
+            await asyncio.gather(
+                *self._tasks,
+                return_exceptions=True,
+            )
+
+        self._tasks.clear()
+
+        logger.info("PulseDesk detenido.")

@@ -1,4 +1,4 @@
-"""Punto de entrada de PulseDesk RAD."""
+"""Demostración integrada de PulseDesk."""
 
 import asyncio
 import logging
@@ -10,6 +10,8 @@ from pulsedesk.core.state import AppState
 from pulsedesk.sources.alerts_api import AlertsApiSource
 from pulsedesk.sources.heartbeat import HeartbeatSource
 from pulsedesk.sources.telemetry_file import TelemetryFileSource
+from pulsedesk.ui.bridge import UiBridge
+from pulsedesk.ui.console import ConsoleDashboard
 
 
 logging.basicConfig(
@@ -18,65 +20,25 @@ logging.basicConfig(
 )
 
 
-async def heartbeat_handler(
-    event: HeartbeatEvent,
-    state: AppState,
-) -> None:
-    """Procesa eventos heartbeat."""
-
-    state.register_event(event.source)
-
-    logging.info(
-        "Heartbeat | eventos=%d",
-        state.events_processed,
-    )
-
-
-async def telemetry_handler(
-    event: TelemetryEvent,
-    state: AppState,
-) -> None:
-    """Procesa eventos de telemetría."""
-
-    state.register_event(event.source)
-
-    logging.info(
-        "Telemetría | %s=%s",
-        event.metric,
-        event.value,
-    )
-
-
-async def alert_handler(
-    event: AlertEvent,
-    state: AppState,
-) -> None:
-    """Procesa eventos de alerta."""
-
-    state.register_event(event.source)
-    state.alerts_active += 1
-
-    logging.warning(
-        "ALERTA [%s] | %s",
-        event.severity,
-        event.message,
-    )
-
-
 async def run() -> None:
-    """Construye y ejecuta PulseDesk."""
+    """Ejecuta la demostración integrada."""
 
     event_bus = EventBus()
     state = AppState()
 
+    bridge = UiBridge(state)
+    dashboard = ConsoleDashboard()
+
+    bridge.add_listener(dashboard.update)
+
     async def handle_heartbeat(event: HeartbeatEvent) -> None:
-        await heartbeat_handler(event, state)
+        bridge.handle_heartbeat(event)
 
     async def handle_telemetry(event: TelemetryEvent) -> None:
-        await telemetry_handler(event, state)
+        bridge.handle_telemetry(event)
 
     async def handle_alert(event: AlertEvent) -> None:
-        await alert_handler(event, state)
+        bridge.handle_alert(event)
 
     event_bus.subscribe(
         HeartbeatEvent,
@@ -111,21 +73,17 @@ async def run() -> None:
 
     loop = PulseDeskLoop(sources)
 
-    try:
-        await loop.start()
-
-    except asyncio.CancelledError:
-        raise
+    await loop.start()
 
 
 def main() -> None:
-    """Punto de entrada de la aplicación."""
+    """Punto de entrada."""
 
     try:
         asyncio.run(run())
 
     except KeyboardInterrupt:
-        logging.info("Cierre solicitado por el usuario.")
+        print("\nPulseDesk detenido correctamente.")
 
 
 if __name__ == "__main__":
