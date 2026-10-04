@@ -5,6 +5,7 @@ import logging
 
 from pulsedesk.core.event_bus import EventBus
 from pulsedesk.core.events import AlertEvent, HeartbeatEvent, TelemetryEvent
+from pulsedesk.core.handlers import PulseDeskEventHandlers
 from pulsedesk.core.loop import PulseDeskLoop
 from pulsedesk.core.state import AppState
 from pulsedesk.sources.alerts_api import AlertsApiSource
@@ -12,6 +13,7 @@ from pulsedesk.sources.heartbeat import HeartbeatSource
 from pulsedesk.sources.telemetry_file import TelemetryFileSource
 from pulsedesk.ui.bridge import UiBridge
 from pulsedesk.ui.console import ConsoleDashboard
+from pulsedesk.sources.system_status import SystemStatusSource
 
 
 logging.basicConfig(
@@ -31,28 +33,24 @@ async def run() -> None:
 
     bridge.add_listener(dashboard.update)
 
-    async def handle_heartbeat(event: HeartbeatEvent) -> None:
-        bridge.handle_heartbeat(event)
-
-    async def handle_telemetry(event: TelemetryEvent) -> None:
-        bridge.handle_telemetry(event)
-
-    async def handle_alert(event: AlertEvent) -> None:
-        bridge.handle_alert(event)
+    handlers = PulseDeskEventHandlers(
+        state=state,
+        bridge=bridge,
+    )
 
     event_bus.subscribe(
         HeartbeatEvent,
-        handle_heartbeat,
+        handlers.handle_heartbeat,
     )
 
     event_bus.subscribe(
         TelemetryEvent,
-        handle_telemetry,
+        handlers.handle_telemetry,
     )
 
     event_bus.subscribe(
         AlertEvent,
-        handle_alert,
+        handlers.handle_alert,
     )
 
     sources = [
@@ -68,6 +66,10 @@ async def run() -> None:
         AlertsApiSource(
             event_bus=event_bus,
             interval=5.0,
+        ),
+        SystemStatusSource(
+            event_bus=event_bus,
+            interval=4.0,
         ),
     ]
 
