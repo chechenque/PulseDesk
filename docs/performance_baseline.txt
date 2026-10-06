@@ -1,0 +1,31 @@
+PULSEDESK RAD - BASELINE DE RENDIMIENTO
+
+Fecha: 2026-10-03
+
+Escenario:
+- 10,000 eventos TelemetryEvent.
+- EventBus con un suscriptor.
+- Procesamiento mediante asyncio.
+- Medición realizada con time.perf_counter().
+- Perfil realizado mediante cProfile y pstats.
+
+Resultado:
+
+Tiempo total: 0.027109 segundos
+Llamadas totales: 70,551
+Llamadas primitivas: 70,549
+
+Principales puntos observados:
+
+- profile_scenario(): 0.025 s acumulados.
+- EventBus.publish(): 0.009 s acumulados.
+- Creación de TelemetryEvent: 0.005 s.
+- asyncio/event loop: parte importante del tiempo restante.
+
+Conclusión:
+
+El EventBus.publish() representa el principal punto de trabajo
+dentro de la lógica propia de PulseDesk en este escenario.
+
+La optimización posterior deberá medirse nuevamente para comparar
+objetivamente el resultado antes y después.

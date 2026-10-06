@@ -1,5 +1,7 @@
 """Aplicación gráfica de PulseDesk."""
 
+from __future__ import annotations
+
 import sys
 
 from PyQt6.QtCore import Qt
@@ -83,9 +85,3 @@ class DashboardWindow(QMainWindow):
         self._source_value.setText(
             data.last_source,
         )
-
-
-def create_app() -> QApplication:
-    """Crea la aplicación Qt."""
-
-    return QApplication.instance() or QApplication(sys.argv)
