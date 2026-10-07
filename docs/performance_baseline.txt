@@ -1,0 +1,96 @@
+PULSEDESK RAD - BASELINE Y OPTIMIZACIÓN DE RENDIMIENTO
+
+Fecha: 2026-10-06
+
+Entorno:
+- macOS
+- Apple Silicon
+- Python 3.12.14
+- Entorno virtual .venv
+
+Escenario:
+- 10,000 eventos TelemetryEvent.
+- EventBus con un suscriptor.
+- Procesamiento mediante asyncio.
+- Medición realizada con time.perf_counter().
+- Perfil realizado mediante cProfile y pstats.
+- Mismo escenario utilizado antes y después de la optimización.
+
+============================================================
+BASELINE
+============================================================
+
+Tiempo total: 0.023307 segundos
+Llamadas totales: 60,420
+Llamadas primitivas: 60,418
+
+Principales puntos observados:
+
+- profile_scenario(): 0.023 s acumulados.
+- EventBus.publish(): 0.008 s acumulados.
+- Creación de TelemetryEvent: 0.005 s.
+- datetime.now(): 0.003 s.
+- telemetry_handler(): 0.001 s.
+
+Conclusión del baseline:
+
+El EventBus.publish() representó uno de los principales
+puntos de trabajo dentro de la lógica propia de PulseDesk.
+
+============================================================
+OPTIMIZACIÓN
+============================================================
+
+Se optimizó EventBus.publish() para evitar la reconstrucción
+de la lista de referencias activas en cada publicación cuando
+no existen referencias muertas.
+
+La limpieza de referencias débiles se mantiene cuando
+realmente se detecta una referencia muerta.
+
+No se modificó el comportamiento funcional de:
+
+- subscribe()
+- unsubscribe()
+- weak references
+- manejo de errores
+- publicación de eventos
+- limpieza de suscriptores
+
+Validación:
+
+44 pruebas automatizadas pasan correctamente después
+de la optimización.
+
+Resultado:
+
+Tiempo total: 0.021735 segundos
+Llamadas totales: 50,420
+Llamadas primitivas: 50,418
+
+============================================================
+COMPARACIÓN
+============================================================
+
+Tiempo antes:       0.023307 s
+Tiempo después:     0.021735 s
+
+Mejora aproximada:  6.74%
+
+Llamadas antes:     60,420
+Llamadas después:   50,420
+
+Reducción:
+- 10,000 llamadas totales menos.
+- 10,000 llamadas primitivas menos.
+
+Conclusión:
+
+La optimización redujo el trabajo realizado por EventBus.publish()
+sin alterar el comportamiento funcional del sistema.
+
+El mismo escenario de 10,000 eventos fue utilizado para ambas
+mediciones, permitiendo una comparación directa.
+
+La mejora observada fue de aproximadamente 6.74% en el tiempo
+total de ejecución.

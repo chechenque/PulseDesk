@@ -1,25 +1,31 @@
+# Virtual environment
+.venv/
 
-# =========================
 # Python
-# =========================
-
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
+*.pyo
 
-# =========================
-# Entornos virtuales
-# =========================
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
 
-.venv/
-venv/
-env/
-ENV/
+# Profiling
+*.prof
+*.stats
 
-# =========================
-# Variables de entorno / secretos
-# =========================
+# IDE
+.vscode/
+.idea/
 
-.env
-.env.*
+# macOS
+.DS_Store
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# PyInstaller
+*.spec
