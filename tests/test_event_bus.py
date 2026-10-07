@@ -58,6 +58,19 @@ async def test_unsubscribe() -> None:
     assert bus.subscriber_count(HeartbeatEvent) == 0
 
 
+def test_unsubscribe_without_subscribers() -> None:
+    """Unsubscribe sin suscriptores no debe producir errores."""
+
+    bus = EventBus()
+
+    bus.unsubscribe(
+        HeartbeatEvent,
+        lambda event: None,
+    )
+
+    assert bus.subscriber_count(HeartbeatEvent) == 0
+
+
 @pytest.mark.asyncio
 async def test_handler_error_does_not_stop_other_handlers() -> None:
     """Un handler defectuoso no debe detener a los demás."""

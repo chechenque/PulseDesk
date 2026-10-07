@@ -1,6 +1,6 @@
 """Modelo de datos utilizado por la interfaz de PulseDesk."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
 
@@ -13,3 +13,4 @@ class DashboardData:
     alerts_active: int = 0
     last_source: str = "-"
     last_event_at: datetime | None = None
+    recent_events: list[str] = field(default_factory=list)

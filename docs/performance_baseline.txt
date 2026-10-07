@@ -1,6 +1,12 @@
 PULSEDESK RAD - BASELINE DE RENDIMIENTO
 
-Fecha: 2026-10-03
+Fecha: 2026-10-05
+
+Entorno:
+- macOS
+- Apple Silicon
+- Python 3.12.14
+- Entorno virtual .venv
 
 Escenario:
 - 10,000 eventos TelemetryEvent.
@@ -8,24 +14,32 @@ Escenario:
 - Procesamiento mediante asyncio.
 - Medición realizada con time.perf_counter().
 - Perfil realizado mediante cProfile y pstats.
+- Se muestran las 15 funciones con mayor tiempo acumulado.
 
 Resultado:
 
-Tiempo total: 0.027109 segundos
-Llamadas totales: 70,551
-Llamadas primitivas: 70,549
+Tiempo total: 0.023307 segundos
+Llamadas totales: 60,420
+Llamadas primitivas: 60,418
 
 Principales puntos observados:
 
-- profile_scenario(): 0.025 s acumulados.
-- EventBus.publish(): 0.009 s acumulados.
+- profile_scenario(): 0.023 s acumulados.
+- EventBus.publish(): 0.008 s acumulados.
 - Creación de TelemetryEvent: 0.005 s.
-- asyncio/event loop: parte importante del tiempo restante.
+- datetime.now(): 0.003 s.
+- telemetry_handler(): 0.001 s.
 
 Conclusión:
 
-El EventBus.publish() representa el principal punto de trabajo
-dentro de la lógica propia de PulseDesk en este escenario.
+El escenario procesa 10,000 eventos en aproximadamente
+0.023 segundos en el entorno de referencia.
 
-La optimización posterior deberá medirse nuevamente para comparar
-objetivamente el resultado antes y después.
+Dentro de la lógica propia de PulseDesk, EventBus.publish()
+representa uno de los principales puntos de trabajo.
+
+Este resultado constituye el baseline de referencia para
+comparar cualquier optimización posterior.
+
+La comparación antes/después deberá ejecutarse en el mismo
+entorno y utilizando exactamente el mismo escenario.

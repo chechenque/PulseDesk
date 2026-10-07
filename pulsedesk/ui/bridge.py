@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import deque
 from collections.abc import Callable
 from threading import Lock
 
@@ -17,6 +18,7 @@ class UiBridge:
         self._state = state
         self._listeners: list[Callable[[DashboardData], None]] = []
         self._lock = Lock()
+        self._recent_events: deque[str] = deque(maxlen=10)
 
     def add_listener(
         self,
@@ -45,6 +47,10 @@ class UiBridge:
         """Procesa un heartbeat."""
 
         self._state.register_event(event.source)
+        self._add_event(
+            event.source,
+            "INFO",
+        )
         self._notify()
 
     def handle_telemetry(
@@ -54,6 +60,10 @@ class UiBridge:
         """Procesa telemetría."""
 
         self._state.register_event(event.source)
+        self._add_event(
+            event.source,
+            "INFO",
+        )
         self._notify()
 
     def handle_alert(
@@ -64,10 +74,31 @@ class UiBridge:
 
         self._state.register_event(event.source)
         self._state.alerts_active += 1
+
+        self._add_event(
+            event.source,
+            event.severity,
+        )
+
         self._notify()
+
+    def _add_event(
+        self,
+        source: str,
+        severity: str,
+    ) -> None:
+        """Agrega un evento al historial reciente."""
+
+        with self._lock:
+            self._recent_events.append(
+                f"{source:<18} {severity}",
+            )
 
     def snapshot(self) -> DashboardData:
         """Obtiene una copia del estado."""
+
+        with self._lock:
+            recent_events = list(self._recent_events)
 
         return DashboardData(
             running=self._state.running,
@@ -75,6 +106,7 @@ class UiBridge:
             alerts_active=self._state.alerts_active,
             last_source=self._state.last_source or "-",
             last_event_at=self._state.last_event_at,
+            recent_events=recent_events,
         )
 
     def _notify(self) -> None:
