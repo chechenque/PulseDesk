@@ -15,7 +15,6 @@ from pulsedesk.ui.bridge import UiBridge
 from pulsedesk.ui.console import ConsoleDashboard
 from pulsedesk.sources.system_status import SystemStatusSource
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s",

@@ -57,15 +57,9 @@ async def test_telemetry_file_source_publishes_new_lines(
     assert received[0].value == "temperature=25"
     assert received[1].value == "humidity=60"
 
-    assert all(
-        event.source == "telemetry_file"
-        for event in received
-    )
+    assert all(event.source == "telemetry_file" for event in received)
 
-    assert all(
-        event.metric == "message"
-        for event in received
-    )
+    assert all(event.metric == "message" for event in received)
 
 
 @pytest.mark.asyncio
@@ -132,11 +126,7 @@ async def test_telemetry_file_source_ignores_empty_lines(
     file_path = tmp_path / "telemetry.txt"
 
     file_path.write_text(
-        "\n"
-        "temperature=25\n"
-        "\n"
-        "   \n"
-        "humidity=60\n",
+        "\n" "temperature=25\n" "\n" "   \n" "humidity=60\n",
         encoding="utf-8",
     )
 

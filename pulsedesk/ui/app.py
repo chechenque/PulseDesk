@@ -232,10 +232,7 @@ class DashboardWindow(QMainWindow):
 
         if data.recent_events:
             self._recent_events.setText(
-                "\n".join(
-                    f"• {event}"
-                    for event in reversed(data.recent_events)
-                ),
+                "\n".join(f"• {event}" for event in reversed(data.recent_events)),
             )
         else:
             self._recent_events.setText(

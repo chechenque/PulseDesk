@@ -5,7 +5,6 @@ import logging
 
 from pulsedesk.sources.base import EventSource
 
-
 logger = logging.getLogger(__name__)
 
 

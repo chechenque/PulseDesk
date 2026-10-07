@@ -11,7 +11,6 @@ from pulsedesk.sources.alerts_api import AlertsApiSource
 from pulsedesk.sources.heartbeat import HeartbeatSource
 from pulsedesk.sources.telemetry_file import TelemetryFileSource
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s",

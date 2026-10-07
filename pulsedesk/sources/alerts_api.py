@@ -8,7 +8,6 @@ from pulsedesk.core.event_bus import EventBus
 from pulsedesk.core.events import AlertEvent
 from pulsedesk.sources.base import EventSource
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -9,7 +9,6 @@ from collections import defaultdict
 from collections.abc import Awaitable, Callable
 from typing import Any
 
-
 logger = logging.getLogger(__name__)
 
 EventHandler = Callable[[Any], Awaitable[None]]
@@ -91,9 +90,7 @@ class EventBus:
 
         if dead_found:
             self._subscribers[type(event)] = [
-                reference
-                for reference in references
-                if reference() is not None
+                reference for reference in references if reference() is not None
             ]
 
     def subscriber_count(
@@ -104,11 +101,7 @@ class EventBus:
 
         references = self._subscribers.get(event_type, [])
 
-        alive = [
-            reference
-            for reference in references
-            if reference() is not None
-        ]
+        alive = [reference for reference in references if reference() is not None]
 
         self._subscribers[event_type] = alive
 

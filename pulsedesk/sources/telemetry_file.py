@@ -9,7 +9,6 @@ from pulsedesk.core.event_bus import EventBus
 from pulsedesk.core.events import TelemetryEvent
 from pulsedesk.sources.base import EventSource
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -60,7 +59,7 @@ class TelemetryFileSource(EventSource):
             encoding="utf-8",
         ).splitlines()
 
-        new_lines = lines[self._position:]
+        new_lines = lines[self._position :]
 
         for line in new_lines:
             line = line.strip()
