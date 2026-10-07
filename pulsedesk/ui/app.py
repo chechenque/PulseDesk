@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from typing import cast
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
@@ -243,4 +244,9 @@ class DashboardWindow(QMainWindow):
 def create_app() -> QApplication:
     """Crea la aplicación Qt."""
 
-    return QApplication.instance() or QApplication(sys.argv)
+    instance = QApplication.instance()
+
+    if instance is not None:
+        return cast(QApplication, instance)
+
+    return QApplication(sys.argv)
