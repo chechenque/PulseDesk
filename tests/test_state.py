@@ -1,8 +1,5 @@
 """Pruebas del estado central de PulseDesk."""
 
-from datetime import datetime
-
-from pulsedesk.core.events import HeartbeatEvent
 from pulsedesk.core.state import AppState
 
 

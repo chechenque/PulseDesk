@@ -10,10 +10,10 @@ from pulsedesk.core.loop import PulseDeskLoop
 from pulsedesk.core.state import AppState
 from pulsedesk.sources.alerts_api import AlertsApiSource
 from pulsedesk.sources.heartbeat import HeartbeatSource
+from pulsedesk.sources.system_status import SystemStatusSource
 from pulsedesk.sources.telemetry_file import TelemetryFileSource
 from pulsedesk.ui.bridge import UiBridge
 from pulsedesk.ui.console import ConsoleDashboard
-from pulsedesk.sources.system_status import SystemStatusSource
 
 logging.basicConfig(
     level=logging.INFO,
