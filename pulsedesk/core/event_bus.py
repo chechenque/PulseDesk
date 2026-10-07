@@ -64,17 +64,19 @@ class EventBus:
     async def publish(self, event: Any) -> None:
         """Publica un evento a sus suscriptores."""
 
-        references = self._subscribers.get(type(event), [])
+        references = self._subscribers.get(type(event))
 
-        alive_references: list[weakref.ReferenceType[Any]] = []
+        if not references:
+            return
+
+        dead_found = False
 
         for reference in references:
             handler = reference()
 
             if handler is None:
+                dead_found = True
                 continue
-
-            alive_references.append(reference)
 
             try:
                 result = handler(event)
@@ -87,10 +89,12 @@ class EventBus:
                     handler,
                 )
 
-        if alive_references:
-            self._subscribers[type(event)] = alive_references
-        else:
-            self._subscribers.pop(type(event), None)
+        if dead_found:
+            self._subscribers[type(event)] = [
+                reference
+                for reference in references
+                if reference() is not None
+            ]
 
     def subscriber_count(
         self,
